@@ -18,7 +18,10 @@ if st.button('download'):
 	# 'formats' key contains a list of all formats
 	formats = info.get("formats", [])
 
-	# Print each format's details
-	for f in formats:
-		st.success(f"ID: {f['format_id']}, Ext: {f.get('ext')}, Resolution: {f.get('resolution')}, FPS: {f.get('fps')}, Audio: {f.get('acodec')}, Video: {f.get('vcodec')}")
-
+	safe_formats = [
+	    f for f in formats
+	    if f['vcodec'] != 'none' and f['acodec'] != 'none' and f['ext'] == 'mp4'
+	]
+	
+	for f in safe_formats:
+	    st.success(f"ID: {f['format_id']}, Resolution: {f.get('resolution')}, Format: {f['ext']}")
