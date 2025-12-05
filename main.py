@@ -10,7 +10,7 @@ url=st.text_input('URL:')
 if st.button('download'):
 	st.success('downloading...')
 	ydl_opts = {
-        "format": "best[ext=mp4]/best",  # MUST be a single progressive stream
+        "format": "96",  # MUST be a single progressive stream
         "outtmpl": "%(title)s.%(ext)s",
     }
 		
