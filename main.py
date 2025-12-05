@@ -75,9 +75,9 @@ if st.button("Download"):
     temp_filename = f"{SESSION_DIR}/temp_%(id)s.%(ext)s"
 
     ydl_opts = {
-        "format": "bv*+ba/b[protocol^=m3u8]/best[protocol^=m3u8]",
+        "format": "best[protocol=m3u8]",
         "outtmpl": temp_filename,
-        "progress_hooks": [make_hook(progress_text, progress_bar)]
+        "progress_hooks": [make_hook(progress_text, progress_bar)],
     }
 
 
