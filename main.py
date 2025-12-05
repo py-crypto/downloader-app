@@ -77,8 +77,14 @@ if st.button("Download"):
     ydl_opts = {
         "format": format_map[quality],
         "outtmpl": temp_filename,
+        "extractor_args": {
+            "youtube": {
+                "player_client": ["default"]
+            }
+        },
         "progress_hooks": [make_hook(progress_text, progress_bar)],
     }
+
 
     try:
         with yt_dlp.YoutubeDL(ydl_opts) as ydl:
