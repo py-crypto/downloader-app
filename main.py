@@ -1,27 +1,21 @@
 import streamlit as st
 import yt_dlp
-import os
-import time
 
-st.title('Vid downloader')
-url=st.text_input('URL:')
+st.title("YouTube Downloader")
 
-#url='https://www.youtube.com/watch?v=hm8b1Gnw1Z4'
-if st.button('download'):
-	ydl_opts = {
-        'list_formats':True,
+url = st.text_input("Enter YouTube URL:")
+
+if st.button("Download"):
+    st.info("Downloading...")
+
+    ydl_opts = {
+        "format": "91/92/93/18/94",  # pick progressive formats
+        "outtmpl": "%(title)s.%(ext)s",
     }
-		
-	with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-		info = ydl.extract_info(url, download=False)  # do NOT download yet
 
-	# 'formats' key contains a list of all formats
-	formats = info.get("formats", [])
-
-	safe_formats = [
-	    f for f in formats
-	    if f['vcodec'] != 'none' and f['acodec'] != 'none' and f['ext'] == 'mp4'
-	]
-	
-	for f in safe_formats:
-	    st.success(f"ID: {f['format_id']}, Resolution: {f.get('resolution')}, Format: {f['ext']}")
+    try:
+        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+            ydl.download([url])
+        st.success("Download complete!")
+    except Exception as e:
+        st.error(f"Error: {e}")
