@@ -75,14 +75,9 @@ if st.button("Download"):
     temp_filename = f"{SESSION_DIR}/temp_%(id)s.%(ext)s"
 
     ydl_opts = {
-        "format": format_map[quality],
+        "format": "bv*+ba/b[protocol^=m3u8]/best[protocol^=m3u8]",
         "outtmpl": temp_filename,
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["tv_html5"]
-            }
-        },
-        "progress_hooks": [make_hook(progress_text, progress_bar)],
+        "progress_hooks": [make_hook(progress_text, progress_bar)]
     }
 
 
