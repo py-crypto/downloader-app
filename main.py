@@ -10,11 +10,9 @@ url=st.text_input('URL:')
 if st.button('download'):
 	st.success('downloading...')
 	ydl_opts = {
-        "format": "bestvideo[ext=mp4]+bestaudio[ext=m4a]/best",  
+        "format": "best[ext=mp4]/best",  # MUST be a single progressive stream
         "outtmpl": "%(title)s.%(ext)s",
-        "merge_output_format": "mp4"
     }
-
 		
 	with yt_dlp.YoutubeDL(ydl_opts) as yd1:
 		yd1.download([url])
