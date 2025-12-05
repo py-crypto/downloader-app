@@ -79,7 +79,7 @@ if st.button("Download"):
         "outtmpl": temp_filename,
         "extractor_args": {
             "youtube": {
-                "player_client": ["default"]
+                "player_client": ["android"]
             }
         },
         "progress_hooks": [make_hook(progress_text, progress_bar)],
