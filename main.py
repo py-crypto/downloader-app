@@ -12,7 +12,13 @@ if st.button('download'):
         'list_formats':True,
     }
 		
-	with yt_dlp.YoutubeDL(ydl_opts) as yd1:
-		info=yd1.extract_info(url)
+	with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+		info = ydl.extract_info(url, download=False)  # do NOT download yet
 
-st.text(info['formats'])
+	# 'formats' key contains a list of all formats
+	formats = info.get("formats", [])
+
+	# Print each format's details
+	for f in formats:
+		st.success(f"ID: {f['format_id']}, Ext: {f.get('ext')}, Resolution: {f.get('resolution')}, FPS: {f.get('fps')}, Audio: {f.get('acodec')}, Video: {f.get('vcodec')}")
+
