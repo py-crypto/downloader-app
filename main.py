@@ -1,40 +1,39 @@
 import streamlit as st
 import requests
 
-BACKEND_URL = "https://backend-donwloader-production.up.railway.app/download"
+BACKEND = "https://backend-donwloader-production.up.railway.app"
 
-st.set_page_config(page_title="Universal Downloader", layout="centered")
+st.title("Video Downloader")
 
-st.title("📥 Universal Video Downloader")
-
-url = st.text_input("Enter Video URL")
+url = st.text_input("Enter YouTube URL")
+format = st.selectbox("Choose format", ["480p", "360p", "720p"], index=0)
 
 if st.button("Download"):
-    if not url:
-        st.error("Please enter a valid URL!")
-    else:
-        try:
-            with st.spinner("Downloading... Please wait."):
-                response = requests.post(
-                    BACKEND_URL,
-                    json={"url": url},
-                    timeout=600
-                )
+    with st.spinner("Requesting backend..."):
+        # Step 1 → send POST request
+        r = requests.post(
+            f"{BACKEND}/download",
+            json={"url": url, "format": format}
+        )
 
-            if response.status_code == 200:
-                file_name = response.headers.get("Content-Disposition", "video.mp4")
-                file_data = response.content
+        if r.status_code != 200:
+            st.error("Backend Error: " + r.text)
+        else:
+            download_id = r.json()["download_id"]
 
-                st.success("Download Complete!")
+            # Step 2 → fetch actual file
+            file_url = f"{BACKEND}/get_file/{download_id}"
+            video_response = requests.get(file_url)
 
+            if video_response.status_code == 200:
+                st.success("Download Ready!")
+
+                # Step 3 → Provide download button
                 st.download_button(
-                    label="Click to Save File",
-                    data=file_data,
-                    file_name=file_name.replace("attachment; filename=", ""),
+                    label="Save Video",
+                    data=video_response.content,
+                    file_name="video.mp4",
                     mime="video/mp4"
                 )
             else:
-                st.error(f"Backend Error: {response.text}")
-
-        except Exception as e:
-            st.error(f"Error: {e}")
+                st.error("Could not fetch the file.")
