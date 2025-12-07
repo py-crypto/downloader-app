@@ -41,4 +41,3 @@ if url:
                     file_url = f"{BACKEND}/get_file/{download_id}"
 
                     st.success("Download ready!")
-                    st.markdown
