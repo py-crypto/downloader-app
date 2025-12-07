@@ -3,37 +3,41 @@ import requests
 
 BACKEND = "https://backend-donwloader-production.up.railway.app"
 
-st.title("Video Downloader")
+st.title("YouTube Video Downloader")
 
 url = st.text_input("Enter YouTube URL")
-format = st.selectbox("Choose format", ["480p", "360p", "720p"], index=0)
 
-if st.button("Download"):
-    with st.spinner("Requesting backend..."):
-        # Step 1 → send POST request
-        r = requests.post(
-            f"{BACKEND}/download",
-            json={"url": url, "format": format}
-        )
+if url:
+    with st.spinner("Fetching available formats..."):
+        try:
+            r = requests.post(f"{BACKEND}/formats", json={"url": url})
+            r.raise_for_status()
+            data = r.json()
+            title = data.get("title", "video")
+            formats = data.get("formats", [])
+        except Exception as e:
+            st.error(f"Failed to fetch formats: {e}")
+            formats = []
 
-        if r.status_code != 200:
-            st.error("Backend Error: " + r.text)
-        else:
-            download_id = r.json()["download_id"]
+    if formats:
+        # Build selectbox options: "360p (mp4)"
+        options = [f'{f["resolution"]}p ({f["ext"]})' for f in formats]
+        selection = st.selectbox("Choose format", options)
 
-            # Step 2 → fetch actual file
-            file_url = f"{BACKEND}/get_file/{download_id}"
-            video_response = requests.get(file_url)
+        # Get the format_id for the selected option
+        chosen_format = formats[options.index(selection)]["format_id"]
 
-            if video_response.status_code == 200:
-                st.success("Download Ready!")
+        if st.button("Download"):
+            with st.spinner("Requesting backend to download..."):
+                try:
+                    r = requests.post(f"{BACKEND}/download",
+                                      json={"url": url, "format": chosen_format})
+                    r.raise_for_status()
+                    download_id = r.json()["download_id"]
+                    file_url = f"{BACKEND}/get_file/{download_id}"
 
-                # Step 3 → Provide download button
-                st.download_button(
-                    label="Save Video",
-                    data=video_response.content,
-                    file_name="video.mp4",
-                    mime="video/mp4"
-                )
-            else:
-                st.error("Could not fetch the file.")
+                    st.success("Download ready!")
+                    st.markdown(f"[Click here to download **{title}.mp4**]({file_url})")
+                except Exception as e:
+                    st.error(f"Download failed: {e}")
+
