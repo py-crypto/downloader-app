@@ -1,60 +1,38 @@
+#frontend
+import requests as re
 import streamlit as st
-import requests
-
-# Replace with your backend URL
-BACKEND = "https://backend-donwloader-production.up.railway.app"
 
 st.set_page_config(page_title="YouTube Video Downloader", layout="centered")
 st.title("YouTube Video Downloader")
 
-# Input URL
-url = st.text_input("Enter YouTube URL")
 
-if url:
-    # Fetch available formats from backend
-    with st.spinner("Fetching available formats..."):
-        try:
-            r = requests.post(f"{BACKEND}/formats", json={"url": url})
-            r.raise_for_status()
-            data = r.json()
-            title = data.get("title", "video")
-            formats = data.get("formats", [])
+#takes input field
 
-        except requests.exceptions.RequestException as e:
-            st.error(f"Failed to fetch formats: {e}")
-            formats = []
+yt_link=st.text_input('Enter the url')
+backend='https://backend-donwloader-production.up.railway.app'
 
-    if formats:
-        # Build selectbox options like "360p (mp4)"
-        options = [f'{f["resolution"]}p ({f["ext"]})' for f in formats]
-        selection = st.selectbox("Choose format", options)
 
-        # Get the format_id for the selected option
-        chosen_format = formats[options.index(selection)]["format_id"]
+def list_format():
+	payload={'url':yt_link}
+	response=re.post(url=f'{backend}/get_format',json=payload)
+	avl_formats=response.json()
+	return avl_formats
 
-        # Download button
-        if st.button("Download"):
-            with st.spinner("Requesting backend to download..."):
-                try:
-                    # Request backend to download video
-                    r = requests.post(
-                        f"{BACKEND}/download",
-                        json={"url": url, "format": chosen_format}
-                    )
-                    r.raise_for_status()
+def download_vid():
+		payload2={'url':yt_link,'format_id':format_id}
+		response2=re.post(f'{backend}/download',json=payload2)
+		file_name=response2.json().get('file_name',' ')
+		download_url=(f'{backend}/download_file?file_name={file_name}')
+		st.markdown(f"<a href='{download_url}' download='{file_name}'>📥 Click here to download</a>",unsafe_allow_html=True)
+		
 
-                    download_id = r.json()["download_id"]
-                    file_url = f"{BACKEND}/get_file/{download_id}"
+if yt_link:
+	avl_formats=list_format()
+	req_format=st.selectbox('Enter the required format',avl_formats.keys())
+	if st.button('Download video'):
+		with st.spinner('downloading video'):
+			format_id=avl_formats.get(req_format,'480')
+			download_vid()
 
-                    st.success("Download ready!")
-                    st.markdown(
-                        f"[Click here to download **{title}.mp4**]({file_url})",
-                        unsafe_allow_html=True
-                    )
-
-                except requests.exceptions.RequestException as e:
-                    st.error(f"Download failed: {e}")
-                except Exception as e:
-                    st.error(f"An error occurred: {e}")
-    else:
-        st.warning("No video formats found for this URL.")
+			
+	
